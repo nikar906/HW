@@ -1,44 +1,85 @@
-import random
-import time
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>深夜崩潰食堂 Online</title>
+    <style>
+        body { background-color: #1a1a2e; color: #e94560; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #game-container { background: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 80%; max-width: 600px; text-align: center; border: 2px solid #0f3460; }
+        h1 { color: #f1c40f; text-shadow: 2px 2px #c0392b; }
+        #story { font-size: 1.2rem; margin-bottom: 20px; min-height: 100px; color: #ffffff; }
+        .stats { display: flex; justify-content: space-around; margin-bottom: 20px; font-weight: bold; color: #4ecca3; }
+        button { background: #e94560; color: white; border: none; padding: 10px 20px; margin: 10px; border-radius: 5px; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        button:hover { background: #0f3460; transform: scale(1.1); }
+        button:disabled { background: #555; cursor: not-allowed; }
+    </style>
+</head>
+<body>
 
-def kitchen_game():
-    print("--- 👨‍🍳 歡迎來到《深夜崩潰食堂》 ---")
-    print("現在是凌晨兩點，外面下著大雨，突然衝進來一群飢餓的客人...")
-    
-    stress_level = 0  # 壓力值
-    score = 0         # 分數
+<div id="game-container">
+    <h1>👨‍🍳 深夜崩潰食堂</h1>
+    <div class="stats">
+        <div>壓力值: <span id="stress">0</span> / 40</div>
+        <div>得分: <span id="score">0</span></div>
+    </div>
+    <div id="story">現在是凌晨兩點，外面下著大雨... 一位上班族衝了進來，大喊：『給我最快的東西！』</div>
+    <div id="actions">
+        <button onclick="makeChoice('A')">A: 現炒炒飯 (5分鐘)</button>
+        <button onclick="makeChoice('B')">B: 微波冷泡麵 (30秒)</button>
+    </div>
+</div>
 
-    # 第一關：點餐危機
-    print("\n[情境 1] 一位滿身大汗的上班族大喊：『給我最快的東西！我快趕不上末班車了！』")
-    choice1 = input("(A) 炒飯（要現場炒 5 分鐘） (B) 昨天的冷泡麵（直接微波 30 秒）\n回答：").upper()
-    
-    if choice1 == "A":
-        print("🍳 雖然慢，但鍋氣十足！客人感動到流淚，壓力 -5。")
-        stress_level -= 5
-        score += 20
-    else:
-        print("🤮 客人吃到一半發現麵心是硬的，當場翻桌！壓力 +20。")
-        stress_level += 20
+<script>
+    let stress = 0;
+    let score = 0;
+    let step = 1;
 
-    # 第二關：突發狀況（隨機事件）
-    event = random.choice(["瓦斯沒了", "洗碗機炸開", "發現一隻會唱歌的蟑螂"])
-    print(f"\n⚠️ 突發狀況：{event}！！")
-    
-    choice2 = input("(A) 冷靜處理 (B) 跟著尖叫\n回答：").upper()
-    
-    if choice2 == "A":
-        print("😎 你展現了主廚的霸氣，成功化解危機。")
-        score += 30
-    else:
-        print("😱 廚房陷入混亂，所有客人都嚇跑了。壓力 +30。")
-        stress_level += 30
+    function updateDisplay(text) {
+        document.getElementById('story').innerText = text;
+        document.getElementById('stress').innerText = stress;
+        document.getElementById('score').innerText = score;
+    }
 
-    # 結算
-    print("\n--- 營業結束 ---")
-    if stress_level > 40:
-        print(f"💀 你的評價：地獄廚神。店倒閉了。 (得分: {score})")
-    else:
-        print(f"🌟 你的評價：深夜守護神。生意興隆！ (得分: {score})")
+    function makeChoice(choice) {
+        if (step === 1) {
+            if (choice === 'A') {
+                stress -= 5; score += 20;
+                updateDisplay("🍳 雖然慢，但鍋氣十足！客人感動到流淚。接下來...");
+            } else {
+                stress += 20;
+                updateDisplay("🤮 客人發現麵心是硬的，當場翻桌！接下來...");
+            }
+            step = 2;
+            document.querySelector("button:nth-child(1)").innerText = "A: 冷靜處理災難";
+            document.querySelector("button:nth-child(2)").innerText = "B: 跟著崩潰大叫";
+            
+            const events = ["瓦斯沒了", "洗碗機炸開", "發現一隻會唱歌的蟑螂"];
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            setTimeout(() => {
+                alert("⚠️ 突發狀況：" + randomEvent + "！！");
+            }, 100);
 
-# 啟動遊戲
-kitchen_game()
+        } else if (step === 2) {
+            if (choice === 'A') {
+                score += 30;
+                updateDisplay("😎 你展現了主廚的霸氣，成功化解危機。營業結束！");
+            } else {
+                stress += 30;
+                updateDisplay("😱 廚房陷入混亂，所有客人都嚇跑了。營業結束！");
+            }
+            endGame();
+        }
+    }
+
+    function endGame() {
+        document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        if (stress > 40) {
+            document.getElementById('story').innerHTML += "<br><br>💀 <b>評價：地獄廚神。店倒閉了。</b>";
+        } else {
+            document.getElementById('story').innerHTML += "<br><br>🌟 <b>評價：深夜守護神。生意興隆！</b>";
+        }
+    }
+</script>
+
+</body>
+</html>
