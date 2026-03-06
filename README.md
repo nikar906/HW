@@ -1,64 +1,31 @@
-[README.md](https://github.com/user-attachments/files/25771011/README.md)
-# 🎮 Guessing Game
+# 🍳 深夜崩潰食堂 (Midnight Kitchen Chaos)
 
-> *“Guess the number and beat the odds!”*
+!
 
----
-
-## 👋 About Me
-
-Hello! I'm **林幸臻** – a student/developer who enjoys building small
-interactive Python projects. I love learning by doing and sharing my
-code with others.  
-
-Feel free to connect with me on [GitHub](https://github.com/your-username)
-or drop me a message if you have suggestions!
+這是一個基於 Python 開發的**文字冒險經營遊戲**。你將扮演一名在凌晨兩點奮鬥的廚師，挑戰在極高壓力的環境下滿足客人的胃，同時避免廚房爆炸。
 
 ---
 
-## 🕹️ Game Overview
+## 📖 遊戲故事背景
+深夜的街頭，大雨滂沱。你的食堂是這條街上最後的燈火。疲憊的上班族、神祕的流浪漢、甚至是會唱歌的蟑螂都可能出現在你的店裡。你的一舉一動，將決定你是成為**「深夜守護神」**，還是慘遭倒閉的**「地獄廚神」**。
 
-**Guessing Game** is a simple console-based Python program.  
-The computer thinks of a random number between 1 and 100, and you try to
-guess it in as few attempts as possible.
+---
 
-> _“How quickly can you find the hidden number?”_
+## ✨ 遊戲核心機制
 
-### Features
+* **📈 壓力系統 (Stress Level)**：決策不當會增加壓力，超過 40 點即判定遊戲結束。
+* **🎲 隨機事件 (Random Events)**：利用 Python 的 `random` 模組，確保每次遊玩遇到的災難都不盡相同。
+* **🏆 得分機制 (Scoring)**：高品質的服務會帶來高分，這將決定你最終的成就稱號。
 
-- ✅ Random number generation (1–100)
-- 🚀 Instant high/low feedback after each guess
-- 🔁 Replay support planned
-- 🔧 Easy to extend with difficulty levels or score tracking
+---
 
-### How to Play
+## 🛠️ 如何開始遊戲
+
+### 1. 前置準備
+確保你的電腦環境中已安裝 [Python 3](https://www.python.org/)。
+
+### 2. 下載與執行
+你可以將程式碼存為 `kitchen_game.py`，然後在終端機執行：
 
 ```bash
-# run the game
-python guessing_game.py
-```
-
-- Enter a number when prompted.
-- The program tells you if your guess is too low, too high, or correct.
-- Keep guessing until you succeed!
-
----
-
-## 🚀 Getting Involved
-
-Want to improve the game or add features?  
-Feel free to open an issue or submit a pull request.  
-Contributions are welcome!
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-Thanks for checking out my project – I hope you enjoy playing it as
-much as I enjoyed creating it!  
-_Sincerely,_  
-**林幸臻**
+python kitchen_game.py
