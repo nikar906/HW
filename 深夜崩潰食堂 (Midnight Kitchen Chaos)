@@ -3,175 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>深夜崩潰食堂 Online - 豪華版</title>
+    <title>深夜食堂：命運分支 - 終極版</title>
     <style>
-        body { background-color: #1a1a2e; color: #e94560; font-family: 'STHeiti', 'Microsoft JhengHei', Courier, monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        :root { --main-red: #e94560; --bg-dark: #1a1a2e; --panel-bg: #16213e; --accent: #4ecca3; --gold: #f1c40f; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* 整體容器放大 */
-        #game-container { background: #16213e; padding: 50px; border-radius: 25px; box-shadow: 0 0 40px rgba(0,0,0,0.7); width: 90%; max-width: 1000px; /* 最大寬度加大 */ text-align: center; border: 4px solid #0f3460; }
-        
-        /* 標題放大 */
-        h1 { color: #f1c40f; text-shadow: 4px 4px #c0392b; font-size: 3.5rem; margin-top: 0; }
-        
-        /* 數值區放大 */
-        .stats { display: flex; justify-content: space-around; margin-bottom: 40px; font-weight: bold; color: #4ecca3; font-size: 1.8rem; /* 字體放大 */ border-bottom: 2px solid #0f3460; padding-bottom: 20px; }
-        .stat-danger { color: #e74c3c; animation: blink 1s infinite; }
+        #game-container { background: var(--panel-bg); width: 95%; max-width: 900px; padding: 40px; border-radius: 30px; border: 3px solid #0f3460; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; }
 
-        /* 故事文字放大 */
-        #story { font-size: 2.2rem; /* 字體大幅放大 */ margin-bottom: 40px; min-height: 150px; color: #ffffff; line-height: 1.6; text-align: left; /* 靠左對齊方便閱讀長文 */ padding: 0 20px; }
-        
-        /* 按鈕區與按鈕放大 */
-        #actions { display: flex; flex-direction: column; /* 按鈕垂直排列，看起來更有氣勢 */ align-items: center; gap: 20px; }
-        button { background: #e94560; color: white; border: none; padding: 20px 40px; border-radius: 12px; cursor: pointer; font-size: 1.8rem; /* 按鈕文字放大 */ transition: 0.3s; width: 100%; /* 按鈕寬度撐滿 */ max-width: 600px; box-shadow: 0 5px 0 #8e2a3a; font-weight: bold; }
-        button:hover { background: #c0392b; transform: translateY(-3px); box-shadow: 0 8px 0 #8e2a3a; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #8e2a3a; }
-        button:disabled { background: #555; cursor: not-allowed; box-shadow: none; transform: none; }
+        /* 地圖系統 */
+        .map-container { display: flex; justify-content: space-between; margin-bottom: 30px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 15px; position: relative; }
+        .node { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; z-index: 2; transition: 0.5s; border: 2px solid #555; }
+        .node.active { background: var(--gold); color: black; box-shadow: 0 0 15px var(--gold); border-color: white; }
+        .node.passed { background: var(--accent); color: black; }
+        .map-line { position: absolute; top: 30px; left: 5%; width: 90%; height: 2px; background: #444; z-index: 1; }
 
-        /* 結局文字樣式 */
-        .end-title { font-size: 3rem; font-weight: bold; margin-top: 30px; }
-        .success { color: #2ecc71; }
-        .failure { color: #e74c3c; }
+        /* 數值條 */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .progress-bar-bg { width: 200px; height: 15px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #555; }
+        #stress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ecca3, #e94560); transition: 0.5s; }
 
-        @keyframes blink { 50% { opacity: 0.5; } }
+        /* 故事內容 */
+        #story-box { min-height: 200px; margin-bottom: 30px; }
+        #story-text { font-size: 1.8rem; line-height: 1.5; color: #fff; margin-bottom: 20px; }
+        #result-text { font-size: 1.3rem; color: var(--accent); min-height: 1.5em; font-style: italic; }
+
+        /* 按鈕互動 */
+        .btn-group { display: grid; gap: 15px; }
+        button { background: var(--main-red); color: white; border: none; padding: 18px; border-radius: 12px; font-size: 1.4rem; cursor: pointer; transition: 0.2s; font-weight: bold; box-shadow: 0 4px 0 #8e2a3a; }
+        button:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button:active { transform: translateY(2px); box-shadow: none; }
+        button:disabled { background: #444; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
+
+        /* 特效 */
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-3px, 0px) rotate(-1deg); } 50% { transform: translate(-1px, 2px) rotate(1deg); } 100% { transform: translate(0px, 0px) rotate(0deg); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h1>👨‍🍳 深夜崩潰食堂</h1>
-    <div class="stats">
-        <div>壓力值: <span id="stress">0</span> / 100</div> <div>得分: <span id="score">0</span></div>
+    <div class="map-container">
+        <div class="map-line"></div>
+        <div class="node active" id="node0">1</div>
+        <div class="node" id="node1">2</div>
+        <div class="node" id="node2">3</div>
+        <div class="node" id="node3">4</div>
+        <div class="node" id="node4">🏁</div>
     </div>
-    <div id="story"></div>
-    <div id="actions">
-        <button id="btnA" onclick="makeChoice('A')"></button>
-        <button id="btnB" onclick="makeChoice('B')"></button>
-        <button id="btnRestart" onclick="location.reload()" style="display:none; background:#3498db; box-shadow: 0 5px 0 #2980b9;">🔄 重新開店</button>
+
+    <div class="header">
+        <div>
+            <span>🔥 壓力指數</span>
+            <div class="progress-bar-bg"><div id="stress-fill"></div></div>
+        </div>
+        <div style="font-size: 1.5rem;">💰 金幣: <span id="score-val" style="color:var(--gold)">0</span></div>
+    </div>
+
+    <div id="story-box">
+        <div id="story-text">載入中...</div>
+        <div id="result-text"></div>
+    </div>
+
+    <div class="btn-group">
+        <button id="optA" onclick="choose('A')"></button>
+        <button id="optB" onclick="choose('B')"></button>
     </div>
 </div>
 
 <script>
-    // 遊戲數據：題目與邏輯
-    const gameState = {
-        stress: 0,
-        score: 0,
-        currentStep: 0,
-        maxStress: 100,
-        levels: [
-            {
-                story: "【關卡 1：點餐危機】<br>凌晨兩點，雨超級大。一位滿身大汗的上班族衝進來大喊：『給我最快的東西！我要趕末班車！』",
-                btnA: "A: 現炒炒飯 (高品質，耗時5分鐘)",
-                btnB: "B: 昨天的冷泡麵 (極速，但難吃)",
-                choiceA: { stress: -10, score: 30, next: "🍳 客人感動到流淚，壓力大幅降低！" },
-                choiceB: { stress: 25, score: 5, next: "🤮 客人吃到麵心是硬的，當場翻桌！" }
+    const data = {
+        stress: 0, score: 0, currentStep: 0,
+        storyline: [
+            { // Step 0
+                text: "深夜 2:00。一對吵架的情侶衝進店裡，女生哭著要吃甜的，男生暴躁地要抽菸。",
+                A: "特製蜂蜜厚片 (安撫情緒)",
+                B: "大喊：店內禁菸！要吵出去吵！",
+                onA: { stress: 5, score: 20, next: "💖 女生破涕為笑，氣氛緩和了。你似乎開啟了『溫馨經營』路線。", branch: "warm" },
+                onB: { stress: 20, score: 0, next: "💢 男生踹了桌子一腳離開。你感到頭痛。這注定是個『硬派之夜』。", branch: "hard" }
             },
-            {
-                story: "【關卡 2：突發狀況】<br>剛送走客人，廚房突然傳出巨響！",
-                btnA: "A: 冷靜拿起滅火器檢查",
-                btnB: "B: 跟著尖叫並抱頭蹲下",
-                choiceA: { stress: 5, score: 40, next: "😎 只是微波爐炸開，你迅速化解危機。" },
-                choiceB: { stress: 40, score: 0, next: "😱 廚房陷入混亂，路過的巡警進來查看。" }
+            { // Step 1 (分歧點)
+                text: "一名神祕老頭走進來，說他可以用寶物換一頓飯。",
+                warm: {
+                    A: "免費請他吃熱麵 (施比受更有福)",
+                    B: "拒絕，這不是慈善機構",
+                    onA: { stress: -10, score: 50, next: "✨ 老頭給了你一張黃金食譜！" },
+                    onB: { stress: 10, score: 0, next: "👴 老頭失望離開，你心裡怪怪的。" }
+                },
+                hard: {
+                    A: "問他有沒有值錢的情報",
+                    B: "叫他滾，別擋著做生意",
+                    onA: { stress: 10, score: 100, next: "🕵️ 他透露了今晚黑幫收費的消息！" },
+                    onB: { stress: -5, score: 0, next: "🚪 店裡清靜多了。" }
+                }
             },
-            {
-                story: "【關卡 3：奧客登場】<br>一位自稱美食評論家的客人坐下，點了一碗麵，吃了一口就皺眉：『這味道太淡了，我要見主廚！』",
-                btnA: "A: 誠懇道歉，重做一碗 (耗時耗材)",
-                btnB: "B: 拿出鹽巴大喊：『自己加！』",
-                choiceA: { stress: 15, score: 50, next: "👨‍🍳 他勉強滿意，給了中評。" },
-                choiceB: { stress: 35, score: -20, next: "🤬 他氣炸了，在 Google 給了一星負評！" }
+            { // Step 2
+                text: "一群喝醉的壯漢進來，要求點選菜單上沒有的『地獄特餐』。",
+                A: "把廚房剩下的食材亂燉一通",
+                B: "堅持只照菜單出餐",
+                onA: { stress: 25, score: 80, next: "🤢 他們竟然覺得很好吃？這真是奇蹟。" },
+                onB: { stress: 10, score: 40, next: "🙄 他們抱怨連連，但還是付了錢。" }
             },
-            {
-                story: "【關卡 4：神祕客】<br>一位穿著黑西裝、戴墨鏡的大漢走進來，放下一個皮箱：『包場。把你們最貴的菜都上來。』",
-                btnA: "A: 拿出傳說中的黃金戰斧牛排",
-                btnB: "B: 顫抖地說：『對不起，我們只有泡麵...』",
-                choiceA: { stress: 20, score: 150, next: "💰 他很滿意，留下大筆小費！" },
-                choiceB: { stress: 10, score: 20, next: "🕴️ 他嘖了一聲，失望地離開了。" }
-            },
-            {
-                story: "【關卡 5：最終考驗】<br>下班時間到了，門口卻突然排起長龍，原來是剛看完演唱會的群眾...",
-                btnA: "A: 咬牙繼續營業 (賺大錢但超累)",
-                btnB: "B: 無情拉下鐵門 (休息是為了走更遠的路)",
-                choiceA: { stress: 50, score: 200, next: "🥳 賺翻了！但你累到快升天。" },
-                choiceB: { stress: -30, score: 0, next: "💤 你安穩地睡了個好覺。" }
+            { // Step 3
+                text: "最後一刻，你的競爭對手（斜對面店主）走進來，臉色慘白說他廚房失火了，求你收留他的客人。",
+                A: "大方接手 (壓力爆棚但聲望滿載)",
+                B: "冷嘲熱諷並關門大吉",
+                onA: { stress: 40, score: 300, next: "🔥 你忙瘋了！但今晚你成了整條街的英雄！" },
+                onB: { stress: -20, score: -50, next: "🤐 雖然輕鬆，但名聲似乎變臭了。" }
             }
         ]
     };
 
-    const storyEl = document.getElementById('story');
-    const stressEl = document.getElementById('stress');
-    const scoreEl = document.getElementById('score');
-    const btnA = document.getElementById('btnA');
-    const btnB = document.getElementById('btnB');
-    const btnRestart = document.getElementById('btnRestart');
+    let branch = "warm";
 
-    function updateDisplay() {
-        const currentLevel = gameState.levels[gameState.currentStep];
-        storyEl.innerHTML = currentLevel.story;
-        btnA.innerText = currentLevel.btnA;
-        btnB.innerText = currentLevel.btnB;
+    function updateUI(resultText = "") {
+        const step = data.storyline[data.currentStep];
+        const content = (data.currentStep > 0 && step[branch]) ? step[branch] : step;
+
+        document.getElementById('story-text').innerText = content.text;
+        document.getElementById('optA').innerText = content.A;
+        document.getElementById('optB').innerText = content.B;
+        document.getElementById('result-text').innerText = resultText;
         
-        stressEl.innerText = gameState.stress;
-        scoreEl.innerText = gameState.score;
+        // 更新數據
+        document.getElementById('score-val').innerText = data.score;
+        document.getElementById('stress-fill').style.width = data.stress + "%";
+        
+        // 更新地圖
+        document.querySelectorAll('.node').forEach((n, i) => {
+            n.classList.remove('active', 'passed');
+            if(i === data.currentStep) n.classList.add('active');
+            if(i < data.currentStep) n.classList.add('passed');
+        });
 
-        // 壓力過高警示
-        if (gameState.stress >= gameState.maxStress * 0.8) {
-            stressEl.parentElement.classList.add('stat-danger');
-        } else {
-            stressEl.parentElement.classList.remove('stat-danger');
-        }
+        if (data.stress >= 80) document.getElementById('game-container').classList.add('shake');
+        else document.getElementById('game-container').classList.remove('shake');
     }
 
-    function makeChoice(choice) {
-        const currentLevel = gameState.levels[gameState.currentStep];
-        const result = (choice === 'A') ? currentLevel.choiceA : currentLevel.choiceB;
+    function choose(opt) {
+        const step = data.storyline[data.currentStep];
+        const content = (data.currentStep > 0 && step[branch]) ? step[branch] : step;
+        const res = (opt === 'A') ? content.onA : content.onB;
 
-        gameState.stress += result.stress;
-        gameState.score += result.score;
-        gameState.currentStep++;
+        data.stress += res.stress;
+        data.score += res.score;
+        if(res.branch) branch = res.branch;
 
-        // 檢查是否倒閉
-        if (gameState.stress >= gameState.maxStress) {
-            endGame(false, result.next + "<br><br>🤯 你的壓力爆表，心臟受不了，食堂當場倒閉！");
-            return;
+        if (data.stress >= 100) return endGame("🤯 壓力炸裂！你當場解下圍裙棄店逃跑了。");
+        
+        data.currentStep++;
+        if (data.currentStep >= data.storyline.length) {
+            let finalMsg = data.score > 400 ? "🏆 傳奇大廚！你讓這條街重獲新生。" : "平淡收場，這就是人生。";
+            return endGame(finalMsg);
         }
 
-        // 檢查是否通關
-        if (gameState.currentStep >= gameState.levels.length) {
-            endGame(true, result.next + "<br><br>🏁 撐過今晚了！結算時間...");
-        } else {
-            // 顯示過場文字，1.5秒後切換下一關
-            storyEl.innerHTML = result.next;
-            btnA.disabled = true;
-            btnB.disabled = true;
-            setTimeout(() => {
-                btnA.disabled = false;
-                btnB.disabled = false;
-                updateDisplay();
-            }, 1500);
-        }
+        updateUI(res.next);
     }
 
-    function endGame(isWin, finalText) {
-        // 更新最終數值
-        stressEl.innerText = Math.max(0, gameState.stress);
-        scoreEl.innerText = gameState.score;
-        btnA.style.display = 'none';
-        btnB.style.display = 'none';
-        btnRestart.style.display = 'block';
-
-        if (!isWin) {
-            storyEl.innerHTML = finalText + "<div class='end-title failure'>💀 評價：地獄廚神（倒閉）</div>";
-        } else {
-            let evaluation = "";
-            if (gameState.score >= 350) evaluation = "<div class='end-title success'>🌟 評價：深夜守護神（傳奇級）</div>";
-            else if (gameState.score >= 200) evaluation = "<div class='end-title success'>😊 評價：社區好鄰居（穩定級）</div>";
-            else evaluation = "<div class='end-title failure'>😕 評價：勉強糊口（菜鳥級）</div>";
-            
-            storyEl.innerHTML = finalText + evaluation + `<br>最終得分: ${gameState.score}`;
-        }
+    function endGame(msg) {
+        document.getElementById('story-box').innerHTML = `<h2 style="font-size:3rem; color:var(--gold)">結局</h2><p style="font-size:2rem">${msg}</p>`;
+        document.querySelector('.btn-group').innerHTML = `<button onclick="location.reload()">重新挑戰</button>`;
+        document.getElementById('node4').classList.add('active');
     }
 
-    // 初始化遊戲
-    updateDisplay();
+    updateUI();
 </script>
 
 </body>
