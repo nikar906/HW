@@ -2,171 +2,190 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>深夜食堂：命運分支 - 終極版</title>
+    <title>深夜食堂：命運迴響</title>
     <style>
-        :root { --main-red: #e94560; --bg-dark: #1a1a2e; --panel-bg: #16213e; --accent: #4ecca3; --gold: #f1c40f; }
-        body { background-color: var(--bg-dark); color: white; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        :root { --neon-pink: #ff007b; --neon-blue: #00d4ff; --bg-black: #050508; }
         
-        #game-container { background: var(--panel-bg); width: 95%; max-width: 900px; padding: 40px; border-radius: 30px; border: 3px solid #0f3460; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative; }
+        * { box-sizing: border-box; }
+        body { 
+            background: var(--bg-black); 
+            color: white; 
+            font-family: 'Noto Sans TC', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
 
-        /* 地圖系統 */
-        .map-container { display: flex; justify-content: space-between; margin-bottom: 30px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 15px; position: relative; }
-        .node { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; z-index: 2; transition: 0.5s; border: 2px solid #555; }
-        .node.active { background: var(--gold); color: black; box-shadow: 0 0 15px var(--gold); border-color: white; }
-        .node.passed { background: var(--accent); color: black; }
-        .map-line { position: absolute; top: 30px; left: 5%; width: 90%; height: 2px; background: #444; z-index: 1; }
+        /* 穩定版背景 */
+        #bg-effect {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050508 100%);
+            z-index: -1;
+        }
 
-        /* 數值條 */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .progress-bar-bg { width: 200px; height: 15px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #555; }
-        #stress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ecca3, #e94560); transition: 0.5s; }
+        /* 頂部進度條 */
+        #map-overlay { width: 60%; margin: 30px auto; position: relative; display: flex; justify-content: space-between; }
+        .map-dot { width: 10px; height: 10px; background: #333; border-radius: 50%; z-index: 2; transition: 0.5s; }
+        .map-dot.active { background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); transform: scale(1.5); }
+        .map-line { position: absolute; top: 4px; left: 0; width: 100%; height: 2px; background: #222; z-index: 1; }
+        #progress-line { position: absolute; top: 4px; left: 0; width: 0%; height: 2px; background: var(--neon-blue); z-index: 1; transition: 0.5s; }
 
-        /* 故事內容 */
-        #story-box { min-height: 200px; margin-bottom: 30px; }
-        #story-text { font-size: 1.8rem; line-height: 1.5; color: #fff; margin-bottom: 20px; }
-        #result-text { font-size: 1.3rem; color: var(--accent); min-height: 1.5em; font-style: italic; }
+        /* 主舞台 */
+        #stage { flex: 1; display: flex; flex-direction: column; position: relative; padding: 20px; }
 
-        /* 按鈕互動 */
-        .btn-group { display: grid; gap: 15px; }
-        button { background: var(--main-red); color: white; border: none; padding: 18px; border-radius: 12px; font-size: 1.4rem; cursor: pointer; transition: 0.2s; font-weight: bold; box-shadow: 0 4px 0 #8e2a3a; }
-        button:hover { filter: brightness(1.2); transform: translateY(-2px); }
-        button:active { transform: translateY(2px); box-shadow: none; }
-        button:disabled { background: #444; box-shadow: none; cursor: not-allowed; opacity: 0.6; }
+        /* 角色大頭貼 */
+        #avatar { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 80px; filter: drop-shadow(0 0 10px var(--neon-blue)); z-index: 1; }
 
-        /* 特效 */
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-3px, 0px) rotate(-1deg); } 50% { transform: translate(-1px, 2px) rotate(1deg); } 100% { transform: translate(0px, 0px) rotate(0deg); } }
+        /* 選項居中 */
+        #choices { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            width: 400px; 
+            z-index: 10;
+        }
+        .choice-btn { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid #444; 
+            color: white; 
+            padding: 20px; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            border-radius: 8px; 
+            transition: 0.3s;
+            text-align: center;
+        }
+        .choice-btn:hover { border-color: var(--neon-blue); background: rgba(0, 212, 255, 0.1); box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
+
+        /* 對話框置底 */
+        #dialog-box { 
+            position: absolute; 
+            bottom: 40px; left: 50%; 
+            transform: translateX(-50%); 
+            width: 80%; max-width: 1000px;
+            background: rgba(0, 0, 0, 0.8); 
+            border-top: 3px solid var(--neon-blue); 
+            padding: 25px; 
+        }
+        #speaker { color: var(--neon-blue); font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+        #text { font-size: 1.3rem; line-height: 1.6; }
+
+        /* 數據移至右下角 */
+        #stats-panel { 
+            position: absolute; 
+            bottom: 40px; right: 20px; 
+            width: 180px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            z-index: 20;
+        }
+        .bar-bg { width: 100%; height: 5px; background: #222; margin-top: 5px; }
+        .bar-fill { height: 100%; transition: 0.5s; }
     </style>
 </head>
 <body>
-
-<div id="game-container">
-    <div class="map-container">
+    <div id="bg-effect"></div>
+    <div id="map-overlay">
         <div class="map-line"></div>
-        <div class="node active" id="node0">1</div>
-        <div class="node" id="node1">2</div>
-        <div class="node" id="node2">3</div>
-        <div class="node" id="node3">4</div>
-        <div class="node" id="node4">🏁</div>
-    </div>
-
-    <div class="header">
-        <div>
-            <span>🔥 壓力指數</span>
-            <div class="progress-bar-bg"><div id="stress-fill"></div></div>
+        <div id="progress-line"></div>
         </div>
-        <div style="font-size: 1.5rem;">💰 金幣: <span id="score-val" style="color:var(--gold)">0</span></div>
+
+    <div id="stage">
+        <div id="avatar">👨‍🍳</div>
+        
+        <div id="choices">
+            <button class="choice-btn" id="btnA" onclick="choose('A')"></button>
+            <button class="choice-btn" id="btnB" onclick="choose('B')"></button>
+        </div>
+
+        <div id="dialog-box">
+            <div id="speaker">系統</div>
+            <div id="text">載入中...</div>
+        </div>
+
+        <div id="stats-panel">
+            <div>🔥 STRESS<div class="bar-bg"><div id="stress-bar" class="bar-fill" style="background:var(--neon-pink); width:0%"></div></div></div>
+            <div>💎 REPO<div class="bar-bg"><div id="repo-bar" class="bar-fill" style="background:var(--neon-blue); width:0%"></div></div></div>
+        </div>
     </div>
 
-    <div id="story-box">
-        <div id="story-text">載入中...</div>
-        <div id="result-text"></div>
-    </div>
+    <script>
+        // 加上剛才擴充的 8 個關卡資料
+        const gameData = [
+            { speaker: "系統", text: "深夜 2:15。一名帶血西裝的男人推門而入，放下公事包：『包場，別問。』", A: "「規矩我懂。」", B: "「不接不明生意。」", onA: { stress: 20, repo: 50, branch: "mafia", next: "男人開始打加密電話..." }, onB: { stress: 10, repo: 10, branch: "normal", next: "男人離去，一位常客走進來。" } },
+            { mafia: { speaker: "神祕客", text: "『幫我處理這疊燒焦的硬碟。』", A: "強酸銷毀 (共犯)", B: "偷偷報警 (正義)", onA: { stress: 30, repo: 100, next: "你拿到了驚人的酬勞。" }, onB: { stress: 50, repo: -50, next: "你被警方帶走問話..." } }, normal: { speaker: "失業小王", text: "『這是我最後的錢，給我份暖心的。』", A: "特製拉麵 (招待)", B: "照價收費", onA: { stress: -10, repo: 60, next: "小王感動得流淚。" }, onB: { stress: 5, repo: 20, next: "他默默吃完，身影寂寞。" } } },
+            { speaker: "系統", text: "一隻受傷的流浪貓躲在門口避雨。", A: "餵食牛奶肉末", B: "趕走牠", onA: { stress: -10, repo: 30, next: "小貓記住了你的味道。" }, onB: { stress: 15, repo: -10, next: "鄰居對你投來鄙視眼神。" } },
+            { speaker: "外送員", text: "『這張單去貧民窟，獎金翻倍，接嗎？』", A: "接單 (賭一把)", B: "拒絕 (安全第一)", onA: { stress: 35, repo: 80, next: "你見識到了城市的黑暗面。" }, onB: { stress: -5, repo: 0, next: "你安穩地度過了一個小時。" } },
+            { speaker: "流浪漢", text: "『我看到你後門做的事了... 給我錢。』", A: "飽餐一頓收買他", B: "強硬威脅他離開", onA: { stress: 15, repo: 20, next: "他吃飽後暫時閉嘴了。" }, onB: { stress: 30, repo: -30, next: "他在附近散佈你的謠言。" } },
+            { speaker: "系統", text: "廚房電路短路，濃煙瀰漫！", A: "滅火器撲滅", B: "疏散客人保命", onA: { stress: 20, repo: 50, next: "你保住了店面。" }, onB: { stress: 40, repo: -20, next: "營收大打折扣。" } },
+            { speaker: "老奶奶", text: "『孩子，你還記得為何開這家店嗎？』", A: "「為了金錢生存。」", B: "「為了無家可歸的人。」", onA: { stress: 10, repo: -20, next: "老奶奶嘆氣離去。" }, onB: { stress: -20, repo: 100, next: "她是這棟樓的地主。" } },
+            { speaker: "系統", text: "黎明將至，警車與黑道車同時停在門口。", A: "交出證據配合警方", B: "帶錢連夜逃跑", onA: { stress: 50, repo: 500, next: "你成了城市英雄。" }, onB: { stress: 10, repo: -200, next: "你成為了都市傳說。" } }
+        ];
 
-    <div class="btn-group">
-        <button id="optA" onclick="choose('A')"></button>
-        <button id="optB" onclick="choose('B')"></button>
-    </div>
-</div>
+        let state = { step: 0, stress: 0, repo: 0, branch: "main" };
 
-<script>
-    const data = {
-        stress: 0, score: 0, currentStep: 0,
-        storyline: [
-            { // Step 0
-                text: "深夜 2:00。一對吵架的情侶衝進店裡，女生哭著要吃甜的，男生暴躁地要抽菸。",
-                A: "特製蜂蜜厚片 (安撫情緒)",
-                B: "大喊：店內禁菸！要吵出去吵！",
-                onA: { stress: 5, score: 20, next: "💖 女生破涕為笑，氣氛緩和了。你似乎開啟了『溫馨經營』路線。", branch: "warm" },
-                onB: { stress: 20, score: 0, next: "💢 男生踹了桌子一腳離開。你感到頭痛。這注定是個『硬派之夜』。", branch: "hard" }
-            },
-            { // Step 1 (分歧點)
-                text: "一名神祕老頭走進來，說他可以用寶物換一頓飯。",
-                warm: {
-                    A: "免費請他吃熱麵 (施比受更有福)",
-                    B: "拒絕，這不是慈善機構",
-                    onA: { stress: -10, score: 50, next: "✨ 老頭給了你一張黃金食譜！" },
-                    onB: { stress: 10, score: 0, next: "👴 老頭失望離開，你心裡怪怪的。" }
-                },
-                hard: {
-                    A: "問他有沒有值錢的情報",
-                    B: "叫他滾，別擋著做生意",
-                    onA: { stress: 10, score: 100, next: "🕵️ 他透露了今晚黑幫收費的消息！" },
-                    onB: { stress: -5, score: 0, next: "🚪 店裡清靜多了。" }
-                }
-            },
-            { // Step 2
-                text: "一群喝醉的壯漢進來，要求點選菜單上沒有的『地獄特餐』。",
-                A: "把廚房剩下的食材亂燉一通",
-                B: "堅持只照菜單出餐",
-                onA: { stress: 25, score: 80, next: "🤢 他們竟然覺得很好吃？這真是奇蹟。" },
-                onB: { stress: 10, score: 40, next: "🙄 他們抱怨連連，但還是付了錢。" }
-            },
-            { // Step 3
-                text: "最後一刻，你的競爭對手（斜對面店主）走進來，臉色慘白說他廚房失火了，求你收留他的客人。",
-                A: "大方接手 (壓力爆棚但聲望滿載)",
-                B: "冷嘲熱諷並關門大吉",
-                onA: { stress: 40, score: 300, next: "🔥 你忙瘋了！但今晚你成了整條街的英雄！" },
-                onB: { stress: -20, score: -50, next: "🤐 雖然輕鬆，但名聲似乎變臭了。" }
-            }
-        ]
-    };
-
-    let branch = "warm";
-
-    function updateUI(resultText = "") {
-        const step = data.storyline[data.currentStep];
-        const content = (data.currentStep > 0 && step[branch]) ? step[branch] : step;
-
-        document.getElementById('story-text').innerText = content.text;
-        document.getElementById('optA').innerText = content.A;
-        document.getElementById('optB').innerText = content.B;
-        document.getElementById('result-text').innerText = resultText;
-        
-        // 更新數據
-        document.getElementById('score-val').innerText = data.score;
-        document.getElementById('stress-fill').style.width = data.stress + "%";
-        
-        // 更新地圖
-        document.querySelectorAll('.node').forEach((n, i) => {
-            n.classList.remove('active', 'passed');
-            if(i === data.currentStep) n.classList.add('active');
-            if(i < data.currentStep) n.classList.add('passed');
-        });
-
-        if (data.stress >= 80) document.getElementById('game-container').classList.add('shake');
-        else document.getElementById('game-container').classList.remove('shake');
-    }
-
-    function choose(opt) {
-        const step = data.storyline[data.currentStep];
-        const content = (data.currentStep > 0 && step[branch]) ? step[branch] : step;
-        const res = (opt === 'A') ? content.onA : content.onB;
-
-        data.stress += res.stress;
-        data.score += res.score;
-        if(res.branch) branch = res.branch;
-
-        if (data.stress >= 100) return endGame("🤯 壓力炸裂！你當場解下圍裙棄店逃跑了。");
-        
-        data.currentStep++;
-        if (data.currentStep >= data.storyline.length) {
-            let finalMsg = data.score > 400 ? "🏆 傳奇大廚！你讓這條街重獲新生。" : "平淡收場，這就是人生。";
-            return endGame(finalMsg);
+        const mapOverlay = document.getElementById('map-overlay');
+        for(let i=0; i<8; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'map-dot';
+            mapOverlay.appendChild(dot);
         }
 
-        updateUI(res.next);
-    }
+        function update() {
+            const data = gameData[state.step];
+            const content = (state.step === 1) ? data[state.branch] : data;
 
-    function endGame(msg) {
-        document.getElementById('story-box').innerHTML = `<h2 style="font-size:3rem; color:var(--gold)">結局</h2><p style="font-size:2rem">${msg}</p>`;
-        document.querySelector('.btn-group').innerHTML = `<button onclick="location.reload()">重新挑戰</button>`;
-        document.getElementById('node4').classList.add('active');
-    }
+            document.getElementById('text').innerText = content.text;
+            document.getElementById('speaker').innerText = content.speaker || "系統";
+            document.getElementById('btnA').innerText = content.A;
+            document.getElementById('btnB').innerText = content.B;
+            document.getElementById('stress-bar').style.width = state.stress + "%";
+            document.getElementById('repo-bar').style.width = (state.repo / 5) + "%";
+            document.getElementById('progress-line').style.width = (state.step / 7 * 100) + "%";
 
-    updateUI();
-</script>
+            const dots = document.querySelectorAll('.map-dot');
+            dots.forEach((dot, i) => dot.className = i <= state.step ? 'map-dot active' : 'map-dot');
+        }
 
+        function choose(opt) {
+            const data = gameData[state.step];
+            const content = (state.step === 1) ? data[state.branch] : data;
+            const res = opt === 'A' ? content.onA : content.onB;
+
+            state.stress += res.stress;
+            state.repo += res.repo;
+            if(res.branch) state.branch = res.branch;
+
+            document.getElementById('text').innerText = res.next;
+            document.getElementById('choices').style.pointerEvents = 'none';
+            document.getElementById('choices').style.opacity = '0';
+
+            setTimeout(() => {
+                state.step++;
+                if(state.stress >= 100) return end("🤯 壓力爆表！你棄店逃跑了。");
+                if(state.step >= 8) return end("🌅 破曉了。今晚你活了下來。");
+                document.getElementById('choices').style.pointerEvents = 'auto';
+                document.getElementById('choices').style.opacity = '1';
+                update();
+            }, 1500);
+        }
+
+        function end(m) {
+            document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#000;"><h1>${m}</h1><button onclick="location.reload()" style="padding:20px;background:var(--neon-blue);border:none;color:#fff;cursor:pointer;border-radius:10px;">再活一次</button></div>`;
+        }
+
+        update();
+    </script>
 </body>
 </html>
